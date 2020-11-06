@@ -12,7 +12,7 @@ const { ReE } = require('./services/util.service');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 const middleware = require('./middleware/userMiddleware');
 
 const app = express();
