@@ -14,8 +14,8 @@ router.route('/singup').post([
 ], organisationController.create); //create
 
 router.route('/login', organisationMiddleware.checkToken).get([
-  check('username').isEmpty(),
-  check('password').isEmpty()
+  // check('username').isEmpty(),
+  // check('password').isEmpty()
 ], organisationController.login);
 
 router.route('/socialLogin').post([

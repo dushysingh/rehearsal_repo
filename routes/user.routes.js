@@ -14,8 +14,8 @@ router.route('/singup').post([
 ], userController.create); //create
 
 router.route('/login', userMiddleware.checkToken).get([
-  check('username').isEmpty(),
-  check('password').isEmpty()
+  //check('username').isEmpty(),
+  //check('password').isEmpty()
 ], userController.login);
 
 router.route('/socialLogin').post([

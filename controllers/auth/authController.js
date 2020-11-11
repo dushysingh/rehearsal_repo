@@ -2,7 +2,7 @@
   *Created by : Dushyant Sengar
   *Purpose : admin
 */
-const { check, oneOf, validationResult } = require('express-validator');
+const { validationResult } = require('express-validator');
 const common = require('../../models/CrudFunction');
 const AdminTable = require('../../common/table').AdminTable;
 const { ReE, ReS, SendMail } = require('../../services/util.service');
@@ -11,41 +11,6 @@ const config = require("../../config/config");
 const jwt = require('jsonwebtoken');
 
 module.exports = {
-    login: (req, res) => {
-
-        const errors = validationResult(req)
-        if (!errors.isEmpty()) {
-            ReE(res, errors.array(), 422);
-            //return res.status(422).json({ errors: errors.array() })
-        }
-
-        let queryObj = req.query;
-
-        let password_encode = Buffer.from(queryObj.password).toString('base64');
-
-            let functionarguments = {
-                "res": res,
-                "tableName": 'admin',
-                "fields": "id, email",
-                "where": `email = '${queryObj.username}' and password = '${password_encode}'`
-            }
-            common.GetRecords(functionarguments).then(async (result) => {
-                if (result && result != '') {
-                    let token = await adminMiddleware.createJwtToken({
-                        email: queryObj.username,
-                        user: true
-                    });
-                    console.log(req.userInfo);
-                    ReS(res, {'token': token}, 200);
-                }
-                else {
-                    ReE(res, {"msg":"No records found"}, 200);
-                }
-            }).catch((err) => {
-                ReE(res, err, 500);
-            })
-
-    },
 
     forgotPassword: (req, res) => {
 
@@ -56,25 +21,48 @@ module.exports = {
         }
 
         let queryObj = req.query;
+            let table;
+            let fetching_field;
+            let token_field;
+            switch(queryObj.userType) {
+                case 'admin': {
+                    table = 'admin',
+                    fetching_field = 'id',
+                    token_field = 'admin_id'
+                    break;
+                }
+                case 'organisation': {
+                    table = 'organisation_users',
+                    fetching_field = 'org_id',
+                    token_field = 'org_id'
+                    break;
+                }
+                case 'user': {
+                    table = 'users',
+                    fetching_field = 'user_id',
+                    token_field = 'user_id'
+                    break;
+                }
+            }
 
             let functionarguments = {
                 "res": res,
-                "tableName": 'admin',
-                "fields": "id",
+                "tableName": table,
+                "fields": fetching_field,
                 "where": `email = '${queryObj.email}'`
             }
             common.GetRecords(functionarguments).then(async (result) => {
                 if (result && result != '') {
-                    let adminData = JSON.parse(JSON.stringify(result));              
+                    let userData = JSON.parse(JSON.stringify(result));              
 
                     let token = await adminMiddleware.createJwtToken({
-                        user: 'admin',
+                        user: queryObj.userType,
                         email: queryObj.email,
                         type: 'forgot_password'
                     });   
                     
                     let tokenDetail = {
-                        "admin_id": adminData[0]['id'],
+                        [token_field] : userData[0][fetching_field],
                         "token": token
                     }
                    
@@ -89,7 +77,7 @@ module.exports = {
                         from: 'mayank@neosoft.com',
                         to: queryObj.email,
                         subject: 'Sending Email using Node.js',
-                        text: `Hello , You recently requested for forgot password link. Please click on the following link to reset your password: http://localhost:8080/admin/forgotPasswordEmail/${token}`
+                        text: `Hello , You recently requested for forgot password link. Please click on the following link to reset your password: http://localhost:8080/forgotPasswordEmail/${token}`
                       };
 
                     let mailResponse = await SendMail(mailOptions);
@@ -157,6 +145,24 @@ module.exports = {
         }
 
         let queryObj = req.body;
+ 
+        let table;
+
+        switch(queryObj.userType) {
+            case 'admin': {
+                table = 'admin'
+                break;
+            }
+            case 'organisation': {
+                table = 'organisation_users'
+                break;
+            }
+            case 'user': {
+                table = 'users'
+                break;
+            }
+        }
+
         let password_encode = Buffer.from(queryObj.password).toString('base64');
 
             let userDetails = {
@@ -166,7 +172,7 @@ module.exports = {
 
             let functionarguments = {
                 "res": res,
-                "tableName": 'admin',
+                "tableName": table,
                 "updateData": userDetails,
                 "where": `email = '${queryObj.email}'`
             }

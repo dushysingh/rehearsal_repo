@@ -96,7 +96,6 @@ module.exports =
       else {
         Sql = `UPDATE ${table} SET ?   WHERE ${where}`;
       }
-
       mysqlConnection.query(Sql, updateObject, async (err, result) => {
         if (err) {
           ReE(arg.res, err, 500);

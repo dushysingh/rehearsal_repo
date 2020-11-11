@@ -24,19 +24,19 @@ module.exports = {
             let functionarguments = {
                 "res": res,
                 "tableName": UserTable,
-                "fields": "id, name, email",
-                "where": `username = '${queryObj.username}' and password = '${password_encode}'`
+                "fields": "user_id, email",
+                "where": `email = '${queryObj.username}' and password = '${password_encode}'`
             }
             common.GetRecords(functionarguments).then(async (result) => {
                 if (result && result != '') {
-                    const user = {
+                    let token = await userMiddleware.createJwtToken({
                         email: queryObj.email,
-                        name: result[0].name
-                    }
-                    ReS(res, user, 200);
+                        user: true
+                    });
+                    ReS(res, {'token':token}, 200);
                 }
                 else {
-                    ReS(res, {"msg":"No records found"}, 200);
+                    ReE(res, {"msg":"No records found"}, 200);
                 }
             }).catch((err) => {
                 ReE(res, err, 500);
@@ -44,7 +44,7 @@ module.exports = {
 
     },
 
-    create: (req, res) => {
+    create: async (req, res) => {
 
         const errors = validationResult(req)
         if (!errors.isEmpty()) {
@@ -72,21 +72,34 @@ module.exports = {
                 "tableName": UserTable,
                 "addData": userDetails
             }
-            common.AddRecords(functionarguments).then(async (result, error) => {
-                if (result) {
-                    let token = await userMiddleware.createJwtToken({
-                        name: queryObj.name,
-                        email: queryObj.email,
-                        user: true
-                    });
-                    result = result[0].token = token;
-                    ReS(res, result, 200);
-                } else {
-                    ReE(res, error, 500);
-                }
-            }).catch((err) => {
-                ReE(res, err, 500);
-            });
+
+            let organisation_exist = {
+                "res": res,
+                "tableName": 'organisation_users',
+                "fields": "org_id",
+                "where": `org_id = '${queryObj.organisationId}'`
+            } 
+            let is_organisation_exist = await common.GetRecords(organisation_exist);
+            
+            if (is_organisation_exist.length > 0) {
+                common.AddRecords(functionarguments).then(async (result, error) => {
+                    if (result) {
+                        let token = await userMiddleware.createJwtToken({
+                            email: queryObj.email,
+                            user: true
+                        });
+                        result['token'] = token;
+                        ReS(res, result, 200);
+                    } else {
+                        ReE(res, error, 500);
+                    }
+                }).catch((err) => {
+                    ReE(res, err, 500);
+                });
+            } else {
+                ReE(res, {"msg":"Invalid organisation"}, 500);
+            }
+            
     },
 
     forgotPassword: (req, res) => {

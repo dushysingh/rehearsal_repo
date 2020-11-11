@@ -15,14 +15,12 @@ module.exports =
     })
   },
   checkToken: (req, res, next) => {
-    return new Promise(async (resolve, reject) => {
-
       if (req.headers.authorization) {
         try {
           jwt.verify(req.headers.authorization, config.JwtSupersecret, async (err, response) => {
             if (response) {
+              req.userInfo = response.user;
               next();
-              resolve(true);
             }
             else {
               console.error(err)
@@ -30,9 +28,10 @@ module.exports =
             }
           })
         } catch (ex) {
-          console.log("WriteOnJSONfile function error", ex)
+          res.json({ success: false, message: 'Invalid Token' });
         }
-      }
-    })
+      } else {
+        res.json({ success: false, message: 'No token provided' });
+      }   
   }
 }

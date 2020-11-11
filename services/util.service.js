@@ -48,8 +48,8 @@ module.exports.SendMail = (mailOptions, res) => { // Send Mail
             let transporter = await nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
-                    user: 'youremail@gmail.com',
-                    pass: 'yourpassword'
+                    user: process.env.SMTP_USER_NAME,
+                    pass: process.env.SMTP_USER_PASSWORD
                 }
             });
             transporter.sendMail(mailOptions, function (error, info) {

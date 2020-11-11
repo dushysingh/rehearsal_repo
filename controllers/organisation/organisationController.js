@@ -23,20 +23,20 @@ module.exports = {
 
             let functionarguments = {
                 "res": res,
-                "tableName": OrganisationTables,
-                "fields": "id, name, email",
-                "where": `username = '${queryObj.username}' and password = '${password_encode}'`
+                "tableName": 'organisation_users',
+                "fields": "org_id, email",
+                "where": `email = '${queryObj.username}' and password = '${password_encode}'`
             }
             common.GetRecords(functionarguments).then(async (result) => {
                 if (result && result != '') {
-                    const user = {
+                    let token = await organisationMiddleware.createJwtToken({
                         email: queryObj.email,
-                        name: result[0].name
-                    }
-                    ReS(res, user, 200);
+                        user: true
+                    });
+                    ReS(res, {"token": token}, 200);
                 }
                 else {
-                    ReS(res, {"msg":"No records found"}, 200);
+                    ReE(res, {"msg":"No records found"}, 200);
                 }
             }).catch((err) => {
                 ReE(res, err, 500);
@@ -68,17 +68,16 @@ module.exports = {
 
             let functionarguments = {
                 "res": res,
-                "tableName": OrganisationTables,
+                "tableName": 'organisation_users',
                 "addData": userDetails
             }
             common.AddRecords(functionarguments).then(async (result, error) => {
                 if (result) {
                     let token = await organisationMiddleware.createJwtToken({
-                        name: queryObj.name,
                         email: queryObj.email,
                         user: true
                     });
-                    result = result[0].token = token;
+                    result['token'] = token;
                     ReS(res, result, 200);
                 } else {
                     ReE(res, error, 500);
