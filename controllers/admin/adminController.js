@@ -57,24 +57,24 @@ module.exports = {
 
         let queryObj = req.query;
 
-            let functionarguments = {
+        let functionarguments = {
                 "res": res,
                 "tableName": 'admin',
-                "fields": "id",
+                "fields": 'id',
                 "where": `email = '${queryObj.email}'`
             }
+
             common.GetRecords(functionarguments).then(async (result) => {
                 if (result && result != '') {
-                    let adminData = JSON.parse(JSON.stringify(result));              
+                    let userData = JSON.parse(JSON.stringify(result));              
 
                     let token = await adminMiddleware.createJwtToken({
-                        user: 'admin',
                         email: queryObj.email,
                         type: 'forgot_password'
                     });   
                     
                     let tokenDetail = {
-                        "admin_id": adminData[0]['id'],
+                        "admin_id" : userData[0]['orgid_id'],
                         "token": token
                     }
                    
@@ -88,7 +88,7 @@ module.exports = {
                     let mailOptions = {
                         from: 'mayank@neosoft.com',
                         to: queryObj.email,
-                        subject: 'Sending Email using Node.js',
+                        subject: 'Forgot Password',
                         text: `Hello , You recently requested for forgot password link. Please click on the following link to reset your password: http://localhost:8080/admin/forgotPasswordEmail/${token}`
                       };
 
@@ -179,6 +179,5 @@ module.exports = {
             }).catch((err) => {
                 ReE(res, err, 500);
             });
-
     }
 }

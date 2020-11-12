@@ -33,8 +33,9 @@ router.route('/forgotPassword').get([
   check('email').isEmail()
 ], organisationController.forgotPassword);
 
+router.route('/forgotPasswordEmail/:token').get(organisationController.verifyForgotPasswordEmail);
+
 router.route('/resetPassword').put([
-  check('username').isLength({ min: 3 }),
   check('email').isEmail(),
   check('password').isAlphanumeric(),
   check('password').isLength({ max: 8 })
@@ -43,5 +44,38 @@ router.route('/resetPassword').put([
 router.route('/profilePicUpload', organisationMiddleware.checkToken).put([
   check('filename').isEmpty()
 ], organisationController.profilePicUpload);
+
+router.route('/ensemble').post(organisationMiddleware.checkToken, [
+  check('name').isLength({ min: 3 })
+], organisationController.ensembleCreate); //create
+
+router.route('/ensembleList').get(organisationMiddleware.checkToken, [
+], organisationController.ensembleList);
+
+router.route('/trackRequest').post(organisationMiddleware.checkToken, [
+  check('title').isLength({ min: 3 }),
+  check('composer_name').isLength({ min: 3 })
+], organisationController.trackRequest);
+
+router.route('/searchSong').get(organisationMiddleware.checkToken, [
+], organisationController.searchSong);
+
+router.route('/libraryAdd').post(organisationMiddleware.checkToken, [
+  check('library_name').isLength({ min: 3 })
+], organisationController.libraryAdd);
+
+router.route('/songLibrary').post(organisationMiddleware.checkToken, [
+  // check('library_id').isEmpty(),
+  // check('song_id').isEmpty()
+], organisationController.addSongToLibrary);
+
+router.route('/songList').get(organisationMiddleware.checkToken, [
+], organisationController.songList);
+
+router.route('/librarySongs').get(organisationMiddleware.checkToken, [
+], organisationController.librarySongsList);
+
+router.route('/librarySongs').delete(organisationMiddleware.checkToken, [
+], organisationController.deleteLibrarySong);
 
 module.exports = router;

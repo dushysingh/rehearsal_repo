@@ -33,8 +33,9 @@ router.route('/forgotPassword').get([
   check('email').isEmail()
 ], userController.forgotPassword);
 
+router.route('/forgotPasswordEmail/:token').get(userController.verifyForgotPasswordEmail);
+
 router.route('/resetPassword').put([
-  check('username').isLength({ min: 3 }),
   check('email').isEmail(),
   check('password').isAlphanumeric(),
   check('password').isLength({ max: 8 })

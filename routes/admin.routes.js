@@ -16,7 +16,7 @@ router.route('/login').get([
   router.route('/forgotPasswordEmail/:token').get(adminController.verifyForgotPasswordEmail);
   
   router.route('/resetPassword').put([
-    // check('email').isEmail(),
+     check('email').isEmail(),
     // check('password').isAlphanumeric(),
     // check('password').isLength({ max: 8 })
   ], adminController.resetPassword);

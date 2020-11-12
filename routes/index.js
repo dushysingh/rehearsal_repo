@@ -9,7 +9,6 @@ const router = express.Router();
 
 //const UploadFileController = require('../controllers/uploadFile/uploadFileController');
 //const custom = require('../middleware/custom');
-const authController = require('../controllers/auth/authController');
 
 const passport = require('passport');
 const path = require('path');
@@ -73,9 +72,6 @@ const path = require('path');
 //     })
     
 //   });
-router.get('/forgotPassword', authController.forgotPassword);
-router.get('/forgotPasswordEmail/:token', authController.verifyForgotPasswordEmail);
-router.put('/resetPassword', authController.resetPassword);
 
 router.use("/users", require("./user.routes"));
 router.use("/organisations", require("./organisation.routes"));
